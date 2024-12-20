@@ -1,3 +1,3 @@
-flask
-speechrecognition
+Flask
+SpeechRecognition
 pydub

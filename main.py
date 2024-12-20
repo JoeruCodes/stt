@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify
 import base64
 import speech_recognition as sr
-import ssl
 import io
 import wave
 from pydub import AudioSegment

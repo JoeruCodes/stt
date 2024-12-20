@@ -3,7 +3,6 @@ import base64
 import speech_recognition as sr
 import io
 import wave
-from pydub import AudioSegment
 
 app = Flask(__name__)
 
@@ -22,24 +21,18 @@ def transcribe_audio():
         audio_bytes = base64.b64decode(audio_b64)
     except Exception as e:
         return jsonify({"error": "Invalid base64 encoding", "details": str(e)}), 400
-    try:
-        mp3_io = io.BytesIO(audio_bytes)
-        audio_segment = AudioSegment.from_file(mp3_io, format="mp3")
-    except Exception as e:
-        return jsonify({"error": "Failed to process MP3 data", "details": str(e)}), 400
 
-    wav_io = io.BytesIO()
-    audio_segment.export(wav_io, format="wav")
-    wav_io.seek(0)
+    # Since we assume the source is already WAV, just read directly.
+    wav_io = io.BytesIO(audio_bytes)
     try:
         with wave.open(wav_io, 'rb') as wav_file:
             frames = wav_file.readframes(wav_file.getnframes())
             sample_rate = wav_file.getframerate()
             sample_width = wav_file.getsampwidth()
     except wave.Error as e:
-        return jsonify({"error": "Failed to process WAV data after conversion", "details": str(e)}), 400
+        return jsonify({"error": "Failed to process WAV data", "details": str(e)}), 400
 
-    # Create AudioData from the raw frames in memory
+    # Create AudioData from the raw frames
     audio_data = sr.AudioData(frames, sample_rate, sample_width)
 
     r = sr.Recognizer()
